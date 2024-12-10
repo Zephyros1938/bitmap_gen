@@ -9,33 +9,44 @@ mod file_utils;
 mod print_step;
 
 fn main() {
-    // let ps = PrintStep::new('─', ' ', 40);
+    let ps = PrintStep::new('─', '┌', '┐', '├', '┤', '└', '┘', '│', ' ', 75);
 
-    // let fh: FileEditor = FileEditor::new("test.bmp");
+    let mut fh: FileEditor = FileEditor::new("test.bmp");
 
-    // let bmh = BitmapHeader::new_h(bitmap_header::BitmapInfoHeader {
-    //     bi_size: (40),
-    //     bi_width: (0xff),
-    //     bi_height: (0xff),
-    //     bi_planes: (0x01),
-    //     bi_bit_depth: (0x08),
-    //     bi_compression: (0x00),
-    //     bi_size_image: (0xff),
-    //     bi_xpels_per_meter: (0xff),
-    //     bi_ypels_per_meter: (0xff),
-    //     bi_clr_used: (0xff),
-    //     bi_clr_important: (0x00),
-    // });
-    // ps.print_title("FILE HEADER GENERATION STARTING");
-    // fh.write_bytes(&bmh.file_header.bf_signature);
-    // fh.write_u8(&bmh.file_header.bf_size);
+    let size_x: u32 = 0xff;
+    let size_y: u32 = 0xff;
 
-    let u: u32 = 0x89abcdef;
-    u32_to_u8_arr_experimental(u);
+    let mut bitmap = BitmapHeader::new_h(bitmap_header::BitmapInfoHeader {
+        size: (54),
+        width: (size_x),
+        height: (size_y),
+        planes: (0x01),
+        bit_depth: (0x08),
+        compression: (0x00),
+        px_per_m: (0xff),
+        px_per_m_x: (0xff),
+        px_per_m_y: (0xff),
+        palette: (0xff),
+        important_cols: (0x00),
+    });
+    bitmap.header.size =
+        bitmap.info.width * bitmap.info.height * (bitmap.info.bit_depth / 8) as u32;
+    bitmap.header.size += (bitmap.h_size + bitmap.inf_size) as u32;
     println!(
-        "{:08x?} : {:02x?} : {:02x?}",
-        u,
-        u32_to_u8_arr(u),
-        u32_to_u8_arr_experimental(u)
-    )
+        "Total Size (Bytes) : 0x{:08x?}\nTotal Size (Bits)  : 0b{:b}",
+        bitmap.header.size, bitmap.header.size
+    );
+    /*
+       Size calculation for bitmap header = 14 + 40 + (width * height * (bitdepth/8))
+    */
+    ps.print_title("FILE HEADER GENERATION STARTING");
+    ps.print_text("Total Size (Bytes)");
+    ps.print_text(&format!("{:08x?}", bitmap.header.size).to_string());
+    ps.print_text("Total Size (Bits)");
+    ps.print_text(&format!("{:b}", bitmap.header.size).to_string());
+    ps.print_break();
+    ps.print_text("testing");
+    ps.print_end("");
+    fh.write_bytes(&bitmap.header.signature);
+    fh.write_u32(bitmap.header.size);
 }
