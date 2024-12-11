@@ -49,4 +49,6 @@ fn main() {
     ps.print_end("");
     fh.write_bytes(&bitmap.header.signature);
     fh.write_u32(bitmap.header.size);
+    fh.write_u32(bitmap.header.reserved);
+    fh.write_u32(bitmap.header.offset);
 }
